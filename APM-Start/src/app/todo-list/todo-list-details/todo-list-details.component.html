@@ -1,0 +1,71 @@
+<div class="card">
+  <div class="card-header">
+    {{ listName }}
+    <button class="btn btn-primary" (click)="open(content)">
+      Create Items
+    </button>
+  </div>
+  <div class="card-body">
+    <ng-template #content let-modal>
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Create List</h4>
+        <button
+          type="button"
+          class="close"
+          aria-label="Close"
+          (click)="modal.dismiss('Cross click')"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <tr>
+            <td>Item Description</td>
+            <td>
+              <input type="text" class="text" [formControl]="description" />
+            </td>
+          </tr>
+        </table>
+
+        <button class="btn btn-lg btn-primary" (click)="createItem()">
+          Create
+        </button>
+      </div>
+    </ng-template>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <th>Status</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </thead>
+        <tbody>
+                            <tr *ngFor="let choice of todoLists?.checkListItems">
+                                <td>
+                                        <input *ngIf="choice.isChecked == true" type="checkbox" (change)="onCheckChange($event,choice)" checked>
+                                        <input *ngIf="choice.isChecked == false" type="checkbox" (change)="onCheckChange($event,choice)">
+                                </td>
+                                <td>
+                                  <p *ngIf="choice.isChecked == true"><del>
+                                      {{choice.description}}
+                                  </del></p>
+                                  <p  *ngIf="choice.isChecked == false">
+                                      {{choice.description}}
+                                  </p>
+                                </td>
+                                <td><a (click)="delete(choice)"><i class="fa fa-trash"></i></a></td>
+                            </tr>
+                        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer">
+    <button class="btn btn-outline-secondary" (click)="onBack()">
+      <i class="fa fa-chevron-left"></i>Back
+    </button>
+    <button class="btn btn-outline-secondary" (click)="onSave()">
+      Save<i class="fa fa-chevron-right"></i>
+    </button>
+  </div>
+</div>

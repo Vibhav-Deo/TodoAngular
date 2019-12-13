@@ -1,0 +1,79 @@
+<div class="card">
+    <div class="card-header">
+        {{pageTitle}}
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="col-md-4">
+                    <input type="text" class="text" placeholder="Filter" [formControl]='listFilter'>
+                </div>
+            </div>
+            <div class="col-md-4">
+                    <h4 class="text-align:left">Filtered By:{{listFilter.value}}</h4>
+            </div>
+                <div class="col-md-2">
+                        <ng-template #content let-modal>
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="modal-basic-title">Create List</h4>
+                                    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                            </div>
+                            <div class="modal-body">
+                                    <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <td> Name:</td>
+                                                    <td><input type="text" [formControl]="name"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Description:</td>
+                                                    <td><input type="text"[formControl]="description"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <button class="btn btn-lg btn-primary" (click)="createList()">Create</button>
+                            </div>
+                        </ng-template>
+
+                    <button class="btn btn-primary" (click)="open(content)">Create List</button>
+                </div>
+            </div>
+        <div class="table-responsive">
+            <table class="table" *ngIf="todoList$ | async">
+                <thead>
+                    <th>
+                        <tr>
+                            <button class="btn btn-primary" (click)="toggleImages()">
+                                {{buttonText}}
+                            </button>
+                        </tr>
+                    </th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Items Completed</th>
+                    <th>Status</th>
+                    <th>Created On</th>
+                    <th>Due On</th>
+                    <th>Actions</th>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let todoList of filteredList$  | async">
+                        <td><img *ngIf="displayImage" [src]="todoList.imageUrl" alt="" style="width: 50px;height: 50px;"></td>
+                        <td><a [routerLink]="['/lists',todoList.id]">{{todoList.name}}
+                        </a></td>
+                        <td>{{todoList.description}}</td>
+                        <td>{{todoList.completedItems}}/{{todoList.totalItems}}</td>
+                        <td><p *ngIf="todoList.totalItems!=0"><ngb-progressbar [showValue]="true" type="info" [value]="(todoList.completedItems/todoList.totalItems)*100"></ngb-progressbar></p>
+                            <p *ngIf="todoList.totalItems==0"><ngb-progressbar [showValue]="true" type="info" [value]="0"></ngb-progressbar></p>
+                        </td>
+                        <td>{{todoList.createdOn}}</td>
+                        <td>{{todoList.dueOn}}</td>
+                        <td><a (click)="delete(todoList.id)"><i class="fa fa-trash"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

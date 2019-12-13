@@ -1,7 +1,15 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{title}}!!
-  </h1>
-  ... Starter Files ...
+<nav class="navbar navbar-expand navbar-light bg-light">
+    <a class="navbar-brand">{{pageTitle}}</a>    
+    <ul class="nav nav-pills">
+          <li>
+            <a [routerLink]="['/welcome']">Home</a>
+            &nbsp;
+            <a [routerLink]="['/lists']">MyLists</a>
+          </li>
+        </ul>
+</nav>
+<div class="container">
+    <router-outlet></router-outlet>
 </div>
+
