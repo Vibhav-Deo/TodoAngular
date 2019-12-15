@@ -3,13 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TodoListComponent } from '../todo-list/todo-list.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { HttpClientModule  } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService } from '../in-memory-data.service';
 import { TodoListDetailsComponent } from '../todo-list/todo-list-details/todo-list-details.component';
 import { WelcomeComponent } from '../home/welcome.component';
 import { AppRoutingModule } from '../app-routing/app-routing.module';
+import { StoreModule } from '@ngrx/store';
+import { todos } from '../todo-list/todo-list.reducer';
+import { EffectsModule } from '@ngrx/effects';
+import { TodosEffects } from './todo-list.effect';
+
 
 
 @NgModule({
@@ -27,7 +32,9 @@ import { AppRoutingModule } from '../app-routing/app-routing.module';
     HttpClientModule,
     HttpClientInMemoryWebApiModule.forRoot(
       InMemoryDataService, { dataEncapsulation: false }
-    )
+    ),
+    StoreModule.forRoot({ todos }),
+    EffectsModule.forRoot([TodosEffects])
   ]
 })
 export class TodoListModule { }

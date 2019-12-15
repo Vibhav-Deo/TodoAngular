@@ -4,15 +4,15 @@ class CheckListItem {
     description: string;
     isChecked: boolean;
 }
-export interface TodoList {
-      id: number;
-      name: string;
-      description: string;
-      completedItems: number;
-      totalItems: number;
-      checkListItems: CheckListItem[];
-      status: string;
-      imageUrl: string;
-      createdOn: string;
-      dueOn: string;
+export class TodoList {
+    id: number;
+    name: string;
+    description: string;
+    completedItems: number;
+    totalItems: number;
+    checkListItems: CheckListItem[];
+    status: string;
+    imageUrl: string;
+    createdOn: string;
+    dueOn: string;
 }
