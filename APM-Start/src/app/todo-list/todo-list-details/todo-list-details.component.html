@@ -41,7 +41,7 @@
           <th>Actions</th>
         </thead>
         <tbody>
-                            <tr *ngFor="let choice of todoLists?.checkListItems">
+                            <tr *ngFor="let choice of (todos$ | async ).checkListItems">
                                 <td>
                                         <input *ngIf="choice.isChecked == true" type="checkbox" (change)="onCheckChange($event,choice)" checked>
                                         <input *ngIf="choice.isChecked == false" type="checkbox" (change)="onCheckChange($event,choice)">

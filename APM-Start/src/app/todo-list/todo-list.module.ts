@@ -11,7 +11,7 @@ import { TodoListDetailsComponent } from '../todo-list/todo-list-details/todo-li
 import { WelcomeComponent } from '../home/welcome.component';
 import { AppRoutingModule } from '../app-routing/app-routing.module';
 import { StoreModule } from '@ngrx/store';
-import { todos } from '../todo-list/todo-list.reducer';
+import { reducer } from '../todo-list/todo-list.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { TodosEffects } from './todo-list.effect';
 
@@ -33,7 +33,7 @@ import { TodosEffects } from './todo-list.effect';
     HttpClientInMemoryWebApiModule.forRoot(
       InMemoryDataService, { dataEncapsulation: false }
     ),
-    StoreModule.forRoot({ todos }),
+    StoreModule.forRoot({ reducer }),
     EffectsModule.forRoot([TodosEffects])
   ]
 })

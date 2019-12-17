@@ -13,13 +13,13 @@ export class InMemoryDataService implements InMemoryDbService {
         id: 1,
         name: 'List 1',
         description: 'todo list for somthing',
-        completedItems: 1,
+        completedItems: 0,
         totalItems: 2,
         checkListItems: [
         {
           id: 1,
           description: 'something',
-          isChecked: true
+          isChecked: false
         },
         {
           id: 2,

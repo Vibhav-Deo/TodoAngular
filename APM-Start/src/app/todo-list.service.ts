@@ -40,18 +40,18 @@ export class TodoListService {
 
   deleteList(id: number): Observable<TodoList> {
     const url = `${this.getListsUrl}/${id}`;
-
+    console.log("SERVICE" + `${this.getListsUrl}/${id}`);
     return this.http.delete<TodoList>(url, this.httpOptions).pipe(
       tap(data => console.log("[DELETE LIST]", data)),
       catchError(this.handleError<TodoList>("deletedlist"))
     );
   }
 
-  getList(id: number): Observable<TodoList> {
+  getList(id: number): Observable<TodoList[]> {
     const url = `${this.getListsUrl}/${id}`;
-    return this.http.get<TodoList>(url).pipe(
+    return this.http.get<TodoList[]>(url).pipe(
       tap(data => console.log("[GET LIST]", data)),
-      catchError(this.handleError<TodoList>(`getlist id=${id}`))
+      catchError(this.handleError<TodoList[]>(`getlist id=${id}`))
     );
   }
 

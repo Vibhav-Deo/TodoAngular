@@ -1,23 +1,30 @@
 import {
   Component,
   OnInit,
-  Injectable,
-  Inject,
   OnDestroy,
   ViewChild,
-  ChangeDetectionStrategy,
-  Input
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { TodoList } from '../todo-list';
 import { ModalServiceService } from '../modal-service.service';
 import { FormControl } from '@angular/forms';
-import { TodoListService } from '../todo-list.service';
-import { Subscription, BehaviorSubject, Observable } from 'rxjs';
-import { map, tap, switchMap, startWith, take, filter } from 'rxjs/operators';
+import { Subscription, Observable, of, combineLatest } from 'rxjs';
+import {
+  map,
+  tap,
+  switchMap,
+  startWith,
+  take,
+  filter,
+  withLatestFrom
+} from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
-import { getTodos, ADD_TODO_SUCCESS, addTodo } from './todo-list.reducer';
 import { TodosEffects } from '../todo-list/todo-list.effect';
+import { ToDoState } from './todo-list.state';
+import { loadLists, createLists, deleteList } from './todo-list.action';
+import { InMemoryDataService } from '../in-memory-data.service';
+
 @Component({
   selector: 'todo-list',
   templateUrl: './todo-list.component.html',
@@ -25,7 +32,6 @@ import { TodosEffects } from '../todo-list/todo-list.effect';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TodoListComponent implements OnInit, OnDestroy {
-
   pageTitle = 'My list\'s';
   displayImage = false;
   buttonText = 'Show Images';
@@ -34,47 +40,64 @@ export class TodoListComponent implements OnInit, OnDestroy {
   description = new FormControl('');
   dataToAdd: TodoList;
   todos$: Observable<any>;
+  filteredList$: Observable<any>;
   @ViewChild('content', { static: true }) modal: NgbModal;
 
-  todoLists: TodoList[] = [];
   subscriptions: Subscription[] = [];
-  addTodoSuccess$: Observable<any>;
+
+  searchKey$ = this.listFilter.valueChanges.pipe(
+    startWith('')
+  );
+
+  calculate$: Observable<any>;
   constructor(
     private modalService: ModalServiceService,
     private store: Store<any>,
     private todosEffects: TodosEffects
   ) {
-    this.store.dispatch(getTodos());  // effects will be triggered
-    this.todos$ = store.select("todos");
-    this.addTodoSuccess$ = this.todosEffects.addTodo$.pipe(
-      filter(
-        ({ type }) => type === ADD_TODO_SUCCESS
-      )
-    );
+    console.log('COnstructor');
+    this.store.dispatch(loadLists()); // effects will be triggered
+    this.todos$ = store
+      .select(state => state.reducer.data)
+      .pipe(tap(data => console.log('[TODO COMPONENT]', data)));
+
+    this.filteredList$ = combineLatest([
+      this.todos$,
+      this.searchKey$
+    ]).pipe(
+    map(([list, searchKey]) => {
+      let filteredList = list;
+      if (!!searchKey) {
+      filteredList = list.filter(i => i.name.toLocaleLowerCase().indexOf(searchKey.toLocaleLowerCase()) >= 0);
+    }
+      return filteredList;
+    }));
   }
-  filteredList$ = this.listFilter.valueChanges.pipe(
-    startWith(''),
-    switchMap(filter =>
-      this.todos$.pipe(
-        tap(console.log),
-        map(list => {
-          list.data.forEach(element => {
-            element.checkListItems.forEach(item => {
-              if (item.isChecked === true && element.totalItems !== element.checkListItems.length) {
-                element.completedItems = element.completedItems + 1;
-              }
-            });
-            element.totalItems = element.checkListItems.length;
-          });
-          return filter ? this.applyFilter(filter, list) : list;
-        })
-      )
-    )
-  );
+
+  private calculateCompletedItems(list: any) {
+    console.log(list);
+    list.forEach(element => {
+      element.checkListItems.forEach(item => {
+        if (
+          item.isChecked === true &&
+          element.totalItems !== element.checkListItems.length
+        ) {
+          element.completedItems = element.completedItems + 1;
+        }
+      });
+    });
+  }
 
   ngOnInit() {
     console.log('[Init]');
-    //this.fetchListSubj$.next(true);
+    // this.fetchListSubj$.next(true);
+    // this.filteredList$
+    //   .pipe(tap(data => console.log('TAP filtered', data)))
+    //   .subscribe();
+    // this.filteredList$ = this.filteredList$ === undefined ? this.todos$ : this.filteredList$;
+    this.filteredList$
+      .pipe(tap(data => console.log('TAP filtered', data)))
+      .subscribe();
   }
 
   ngOnDestroy(): void {
@@ -88,13 +111,21 @@ export class TodoListComponent implements OnInit, OnDestroy {
     this.buttonText = this.displayImage ? 'Hide Images' : 'Show Images';
   }
 
-  applyFilter(filter: string, list: TodoList[]): TodoList[] {
+  applyFilter(filter: string, list: any): any {
     console.log('In apply filter');
     // tslint:disable-next-line: max-line-length
-    return list.filter(
+    const filteredData = {
+      reducer: {
+        data: []
+      }
+    };
+    Object.assign(filteredData, list);
+    console.log('-------------------------->', filteredData);
+    filteredData.reducer.data = list.reducer.data.filter(
       (item: TodoList) =>
         item.name.toLocaleLowerCase().indexOf(filter.toLocaleLowerCase()) !== -1
     );
+    return filteredData;
   }
 
   open(content): void {
@@ -102,9 +133,9 @@ export class TodoListComponent implements OnInit, OnDestroy {
   }
 
   createList(): void {
-    //console.log('+++++++++++++++++++++++++++', this.validate(this.name.value));
+    // console.log('+++++++++++++++++++++++++++', this.validate(this.name.value));
     this.dataToAdd = {
-      id: 0,
+      id: 3,
       name: this.name.value,
       description: this.description.value,
       completedItems: 0,
@@ -122,7 +153,7 @@ export class TodoListComponent implements OnInit, OnDestroy {
       dueOn: new Date().toDateString()
     };
 
-    this.store.dispatch(addTodo(this.dataToAdd));
+    this.store.dispatch(createLists({ data: this.dataToAdd }));
   }
 
   // validate(name: string): boolean {
@@ -131,10 +162,9 @@ export class TodoListComponent implements OnInit, OnDestroy {
   //     : true;
   // }
 
-  // delete(id): void {
-  //   console.log('Deleted', id);
-  //   this.todoListService.deleteList(id).subscribe(data => {
-  //    this.fetchListSubj$.next(true);
-  //   });
-  // }
+  delete(id): void {
+    console.log('Deleted', id);
+    this.store.dispatch(deleteList({ id }));
+    this.store.dispatch(loadLists());
+  }
 }
